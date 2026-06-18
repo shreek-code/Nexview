@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Page and layout - Light Mode Defaults */
+    --bg-base: #e6e9f0;
+    --bg-subtle: #f0f2f5;
+
+    /* Surface elevation */
+    --surface-1: #e6e9f0;
+    --surface-2: #f0f2f5;
+    --surface-3: #ffffff;
+    --surface-4: #ffffff;
+
+    /* Borders */
+    --border-subtle: rgba(0,0,0,0.05);
+    --border-base: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.14);
+
+    /* Text */
+    --text-primary: #0C0F1A;
+    --text-secondary: #4A506E;
+    --text-tertiary: #9DA3B4;
+    --text-disabled: #C8CCD8;
+
+    /* Glass */
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-blur: 24px;
+  }
+
+  .dark {
+    /* Page and layout - Dark Mode */
+    --bg-base: #15192c;
+    --bg-subtle: #111424;
+
+    /* Surface elevation */
+    --surface-1: #15192c;
+    --surface-2: #1e2238;
+    --surface-3: #222849;
+    --surface-4: #2A3156;
+
+    /* Borders */
+    --border-subtle: rgba(255,255,255,0.06);
+    --border-base: rgba(255,255,255,0.10);
+    --border-strong: rgba(255,255,255,0.16);
+
+    /* Text */
+    --text-primary: #F0F2F8;
+    --text-secondary: #9DA3B4;
+    --text-tertiary: #4A506E;
+    --text-disabled: #343A56;
+
+    /* Glass */
+    --glass-bg: rgba(19, 23, 40, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-blur: 24px;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    @apply antialiased font-sans;
+  }
+}
+
+@layer components {
+  .metric {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(200%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+
+  .glass-light {
+    background: rgba(248, 249, 252, 0.80);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .glass-dark {
+    background: rgba(12, 15, 26, 0.80);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-signal {
+    background: rgba(77, 97, 252, 0.15);
+    border: 1px solid rgba(77, 97, 252, 0.30);
+    backdrop-filter: blur(16px);
+  }
+
+  .glass-alert {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    backdrop-filter: blur(16px);
+  }
+
+  .neumorphic {
+    box-shadow: var(--shadow-neumorphic, 10px 10px 20px rgba(0, 0, 0, 0.05), -10px -10px 20px rgba(255, 255, 255, 0.8));
+    background: var(--bg-neumorphic, linear-gradient(145deg, #ffffff, #e6e9f0));
+  }
+
+  .dark .neumorphic {
+    box-shadow: var(--shadow-neumorphic-dark, 10px 10px 20px rgba(0, 0, 0, 0.4), -10px -10px 20px rgba(255, 255, 255, 0.05));
+    background: var(--bg-neumorphic-dark, linear-gradient(145deg, #15192c, #111424));
+  }
+
+  .neumorphic-inset {
+    box-shadow: var(--shadow-neumorphic-inset, inset 5px 5px 10px rgba(0, 0, 0, 0.05), inset -5px -5px 10px rgba(255, 255, 255, 0.8));
+    background: var(--bg-base);
+  }
+
+  .dark .neumorphic-inset {
+    box-shadow: var(--shadow-neumorphic-inset-dark, inset 5px 5px 10px rgba(0, 0, 0, 0.4), inset -5px -5px 10px rgba(255, 255, 255, 0.05));
+    background: var(--bg-base);
+  }
+}
