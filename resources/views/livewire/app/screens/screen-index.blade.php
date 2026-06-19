@@ -147,7 +147,7 @@
         <x-ui.modal name="add-screen-modal" :show="$showAddModal">
             <form wire:submit.prevent="connectScreen" class="p-6 relative">
                 <!-- Loader Overlay -->
-                <div wire:loading wire:target="connectScreen" class="absolute inset-0 z-10 bg-surface-1/80 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl">
+                <div wire:loading.flex wire:target="connectScreen" class="absolute inset-0 z-10 bg-surface-1/90 backdrop-blur-sm flex-col items-center justify-center rounded-xl">
                     <div class="w-12 h-12 border-4 border-signal-500/30 border-t-signal-500 rounded-full animate-spin mb-4"></div>
                     <p class="text-lg font-medium text-text-primary">Connecting...</p>
                     <p class="text-sm text-text-secondary mt-1">Pairing screen...</p>

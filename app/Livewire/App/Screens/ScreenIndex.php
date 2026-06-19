@@ -42,18 +42,27 @@ class ScreenIndex extends Component
 
         $screenService = app(\App\Services\ScreenService::class);
         $billingService = app(\App\Services\BillingService::class);
-        
-        $billingService->enforceScreenLimit(Auth::user()->organization);
+        try {
+            $billingService->enforceScreenLimit(Auth::user()->organization);
 
-        $screenService->provisionScreen(Auth::user(), [
-            'name' => $this->name,
-            'location_id' => $this->location_id,
-            'registration_code' => $this->registration_code,
-        ]);
+            $screenService->provisionScreen(Auth::user(), [
+                'name' => $this->name,
+                'location_id' => $this->location_id,
+                'registration_code' => $this->registration_code,
+            ]);
 
-        $this->showAddModal = false;
-        $this->dispatch('close-modal', 'add-screen-modal');
-        session()->flash('success', 'Screen paired successfully.');
+            $this->showAddModal = false;
+            $this->dispatch('close-modal', 'add-screen-modal');
+            session()->flash('success', 'Screen paired successfully.');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            foreach ($e->errors() as $key => $messages) {
+                foreach ($messages as $message) {
+                    $this->addError($key, $message);
+                }
+            }
+        } catch (\Exception $e) {
+            $this->addError('registration_code', 'An error occurred: ' . $e->getMessage());
+        }
     }
 
     public function delete(Screen $screen)
