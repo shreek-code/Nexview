@@ -1,0 +1,13 @@
+Push to GitHub
+↓
+GitHub Action
+↓
+SSH into VPS
+↓
+git pull
+↓
+composer install
+↓
+npm build
+↓
+cache clear
