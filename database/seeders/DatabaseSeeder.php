@@ -42,13 +42,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 3.5. Assign a plan to the organization
-        \App\Models\Subscription::create([
-            'organization_id' => $org->id,
-            'plan_id' => 'pro',
-            'status' => 'active',
-            'trial_ends_at' => now()->addDays(14),
-            'ends_at' => now()->addYear(),
-        ]);
+        $plan = \App\Models\Plan::where('slug', 'grow')->first();
+        if ($plan) {
+            \App\Models\Subscription::create([
+                'organization_id' => $org->id,
+                'plan_id' => $plan->id,
+                'status' => 'active',
+                'trial_ends_at' => now()->addDays(14),
+                'ends_at' => now()->addYear(),
+            ]);
+        }
 
         // 4. Create Manager
         $userService = app(\App\Services\UserService::class);
@@ -64,15 +67,22 @@ class DatabaseSeeder extends Seeder
         ]); // Assigned by the org admin
 
         // 5. Provision some screens
-        $screenService = app(\App\Services\ScreenService::class);
-        $screenService->provisionScreen($adminUser, [
+        \App\Models\Screen::create([
+            'organization_id' => $org->id,
             'name' => 'Lobby Display 1',
             'location_id' => $location->id,
+            'device_id' => 'device-' . \Illuminate\Support\Str::random(10),
+            'status' => 'online',
+            'last_heartbeat_at' => now(),
         ]);
-        
-        $screenService->provisionScreen($adminUser, [
+
+        \App\Models\Screen::create([
+            'organization_id' => $org->id,
             'name' => 'Breakroom Display',
             'location_id' => $location->id,
+            'device_id' => 'device-' . \Illuminate\Support\Str::random(10),
+            'status' => 'online',
+            'last_heartbeat_at' => now(),
         ]);
 
         $this->command->info('Test data seeded successfully!');

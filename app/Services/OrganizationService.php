@@ -18,12 +18,17 @@ class OrganizationService
                 'is_onboarded' => true,
             ]);
 
-            \App\Models\Subscription::create([
-                'organization_id' => $organization->id,
-                'plan_id' => $data['plan_id'] ?? 'starter',
-                'status' => 'active',
-                'ends_at' => \Carbon\Carbon::now()->addYear(),
-            ]);
+            $planSlug = $data['plan_id'] ?? 'starter';
+            $plan = \App\Models\Plan::where('slug', $planSlug)->first();
+
+            if ($plan) {
+                \App\Models\Subscription::create([
+                    'organization_id' => $organization->id,
+                    'plan_id' => $plan->id,
+                    'status' => 'active',
+                    'ends_at' => \Carbon\Carbon::now()->addYear(),
+                ]);
+            }
 
             $admin = User::create([
                 'organization_id' => $organization->id,
