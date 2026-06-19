@@ -17,6 +17,11 @@ class AnalyticsService
         $organizationId = $screen->organization_id;
         $insertData = [];
 
+        \Log::info('Ingest playback logs', [
+            'screen_id' => $screen->id ?? null,
+            'location_id' => $screen->location_id ?? null,
+            'location' => $screen->location ?? null,
+        ]);
         foreach ($logs as $log) {
             $insertData[] = [
                 'organization_id' => $organizationId,
