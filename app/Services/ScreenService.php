@@ -126,7 +126,10 @@ class ScreenService
             'is_playing',
             'current_media_id',
             'default_media_id',
+            'orientation',
         ])));
+
+        broadcast(new \App\Events\ScreenUpdated($screen));
 
         return $screen;
     }

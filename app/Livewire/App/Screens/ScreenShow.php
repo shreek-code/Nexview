@@ -89,12 +89,14 @@ class ScreenShow extends Component
         session()->flash('success', 'Override cleared. Falling back to default playlist/media.');
     }
 
-    public function setOrientation($orientation)
+    public function setOrientation($orientation, ScreenService $screenService)
     {
         $this->authorize('update', $this->screen);
         
         if (in_array($orientation, ['landscape', 'portrait'])) {
-            $this->screen->update(['orientation' => $orientation]);
+            $screenService->updatePlaybackSettings($this->screen, [
+                'orientation' => $orientation
+            ]);
             session()->flash('success', 'Screen orientation updated to ' . ucfirst($orientation) . '.');
         }
     }
