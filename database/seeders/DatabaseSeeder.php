@@ -13,6 +13,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            PlanSeeder::class,
+            BlogSeeder::class,
+        ]);
+
         // 1. Create Platform User
         \App\Models\PlatformUser::create([
             'name' => 'Platform Admin',
@@ -34,6 +39,15 @@ class DatabaseSeeder extends Seeder
         $location = \App\Models\Location::create([
             'organization_id' => $org->id,
             'name' => 'New York Office',
+        ]);
+
+        // 3.5. Assign a plan to the organization
+        \App\Models\Subscription::create([
+            'organization_id' => $org->id,
+            'plan_id' => 'pro',
+            'status' => 'active',
+            'trial_ends_at' => now()->addDays(14),
+            'ends_at' => now()->addYear(),
         ]);
 
         // 4. Create Manager
