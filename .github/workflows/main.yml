@@ -1,13 +1,35 @@
-Push to GitHub
-↓
-GitHub Action
-↓
-SSH into VPS
-↓
-git pull
-↓
-composer install
-↓
-npm build
-↓
-cache clear
+name: Deploy NexView
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: nexviewdigital-signage
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/nexviewdigital-signage/htdocs/signage.nexviewdigital.com
+
+            git pull origin main
+
+            composer install --no-dev --optimize-autoloader
+
+            npm install
+            npm run build
+
+            php artisan optimize:clear
+
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            php artisan queue:restart
