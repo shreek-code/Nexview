@@ -51,6 +51,7 @@ class Screen extends Model
         'current_media_id',
         'last_heartbeat_at',
         'last_seen_at',
+        'last_ip',
     ];
 
     protected $casts = [
@@ -61,6 +62,11 @@ class Screen extends Model
     public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
     }
 
     /**

@@ -11,5 +11,5 @@ Broadcast::channel('organization.{orgId}', function ($user, $orgId) {
         return true;
     }
 
-    return $user->organization_id === (int) $orgId;
-});
+    return (int) $user->organization_id === (int) $orgId;
+}, ['guards' => ['web', 'sanctum']]);

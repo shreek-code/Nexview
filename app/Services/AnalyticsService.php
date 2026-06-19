@@ -14,7 +14,7 @@ class AnalyticsService
      */
     public function ingestPlaybackLogs(Screen $screen, array $logs): void
     {
-        $organizationId = $screen->location->organization_id;
+        $organizationId = $screen->organization_id;
         $insertData = [];
 
         foreach ($logs as $log) {

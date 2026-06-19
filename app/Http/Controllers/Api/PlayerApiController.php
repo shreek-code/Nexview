@@ -50,8 +50,24 @@ class PlayerApiController extends Controller
             'all_locations' => Location::all()->toArray(),
         ]);
 
-        $campaigns = Campaign::where('organization_id', $screen->location->organization_id)
+        $now = now();
+        $currentDate = $now->toDateString();
+        $currentTime = $now->toTimeString();
+
+        $campaigns = Campaign::where('organization_id', $screen->organization_id)
             ->where('status', 'active')
+            ->where(function ($q) use ($currentDate) {
+                $q->whereNull('date_start')->orWhere('date_start', '<=', $currentDate);
+            })
+            ->where(function ($q) use ($currentDate) {
+                $q->whereNull('date_end')->orWhere('date_end', '>=', $currentDate);
+            })
+            ->where(function ($q) use ($currentTime) {
+                $q->whereNull('time_start')->orWhere('time_start', '<=', $currentTime);
+            })
+            ->where(function ($q) use ($currentTime) {
+                $q->whereNull('time_end')->orWhere('time_end', '>=', $currentTime);
+            })
             ->where(function ($q) use ($screen) {
                 $q->where('target_type', 'location')
                     ->where('target_location_id', $screen->location_id)
@@ -84,7 +100,7 @@ class PlayerApiController extends Controller
                             'id' => $item->mediaAsset->id,
                             'type' => $item->mediaAsset->type,
                             'url' => asset('storage/'.$item->mediaAsset->path),
-                            'duration' => $item->duration ?? $item->mediaAsset->duration ?? 10,
+                            'duration' => $item->custom_duration ?? $item->mediaAsset->duration ?? 10,
                             'order' => $item->sort_order,
                         ];
                     }
@@ -137,7 +153,7 @@ class PlayerApiController extends Controller
         $screen = $request->user();
 
         $mediaAsset = MediaAsset::where('id', $id)
-            ->where('organization_id', $screen->location->organization_id)
+            ->where('organization_id', $screen->organization_id)
             ->first();
 
         if (! $mediaAsset) {
