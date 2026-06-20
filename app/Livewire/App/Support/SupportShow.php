@@ -32,6 +32,12 @@ class SupportShow extends Component
         }
 
         $this->ticket = $ticket;
+
+        // Mark any notifications for this ticket as read
+        auth()->user()->unreadNotifications()
+            ->where('data->ticket_id', $ticket->id)
+            ->get()
+            ->markAsRead();
     }
 
     public function reply(TicketService $ticketService)

@@ -18,10 +18,14 @@ class NotificationBell extends Component
             
             // Redirect based on the ticket_id in the data
             if (isset($notification->data['ticket_id'])) {
-                if (Auth::guard('platform')->check()) {
-                    $this->redirect(route('admin.tickets.show', $notification->data['ticket_id']), navigate: true);
-                } else {
-                    $this->redirect(route('app.support.show', $notification->data['ticket_id']), navigate: true);
+                $ticket = \App\Models\Ticket::find($notification->data['ticket_id']);
+                
+                if ($ticket) {
+                    if (Auth::guard('platform')->check()) {
+                        $this->redirect(route('admin.tickets.show', $ticket), navigate: true);
+                    } else {
+                        $this->redirect(route('app.support.show', $ticket), navigate: true);
+                    }
                 }
             }
         }

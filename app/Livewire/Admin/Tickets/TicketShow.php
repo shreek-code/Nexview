@@ -26,6 +26,12 @@ class TicketShow extends Component
     {
         $this->ticket = $ticket;
         $this->newStatus = $ticket->status;
+
+        // Mark any notifications for this ticket as read
+        auth('platform')->user()->unreadNotifications()
+            ->where('data->ticket_id', $ticket->id)
+            ->get()
+            ->markAsRead();
     }
 
     public function updateStatus(TicketService $ticketService)
