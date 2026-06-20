@@ -122,6 +122,9 @@
                         <x-heroicon-o-moon x-show="!isDark" x-cloak class="w-5 h-5" />
                     </button>
                     
+                    <!-- Notifications Dropdown -->
+                    <livewire:shared.notification-bell />
+                    
                     <!-- Profile Dropdown -->
                     <div class="relative flex items-center pl-2 border-l border-border-subtle" x-data="{ open: false }" @click.away="open = false">
                         <div class="hidden md:flex flex-col items-end mr-3">

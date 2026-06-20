@@ -130,33 +130,7 @@
                     </button>
                     
                     <!-- Notifications Dropdown -->
-                    <div class="relative" x-data="{ open: false }" @click.away="open = false">
-                        <button @click="open = !open" class="flex items-center justify-center w-11 h-11 rounded-full neumorphic text-text-secondary cursor-pointer hover:text-signal-600 transition-colors focus:outline-none">
-                            <x-heroicon-o-bell class="w-5 h-5" />
-                            <!-- Notification Badge (Example) -->
-                            <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-surface-1 rounded-full"></span>
-                        </button>
-                        
-                        <div x-show="open" x-cloak
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-95 translate-y-2"
-                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                             x-transition:leave="transition ease-in duration-150"
-                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                             x-transition:leave-end="opacity-0 scale-95 translate-y-2"
-                             class="absolute right-0 mt-4 w-80 bg-surface-1 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-border-subtle overflow-hidden z-50">
-                            <div class="px-4 py-3 border-b border-border-subtle flex items-center justify-between bg-surface-2">
-                                <h3 class="text-sm font-bold text-text-primary">Notifications</h3>
-                                <button class="text-xs text-signal-600 hover:text-signal-700 font-medium">Mark all as read</button>
-                            </div>
-                            <div class="max-h-80 overflow-y-auto">
-                                <div class="px-4 py-8 text-center text-sm text-text-tertiary">
-                                    <x-heroicon-o-bell-slash class="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                    No new notifications
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <livewire:shared.notification-bell />
 
                     <!-- Profile Dropdown -->
                     <div class="relative flex items-center pl-2 border-l border-border-subtle" x-data="{ open: false }" @click.away="open = false">

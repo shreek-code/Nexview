@@ -52,7 +52,7 @@
         <div class="bg-surface-2 px-6 py-3 border-b border-border-subtle">
             <h3 class="text-sm font-semibold text-text-secondary">Conversation</h3>
         </div>
-        <div class="divide-y divide-border-subtle">
+        <div class="divide-y divide-border-subtle" wire:poll.5s>
             @foreach($messages as $msg)
                 @php
                     $isUser = $msg->sender_type === \App\Models\User::class;

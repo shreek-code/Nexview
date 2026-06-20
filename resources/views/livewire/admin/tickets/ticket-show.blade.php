@@ -27,7 +27,7 @@
                     <h3 class="text-sm font-semibold text-text-secondary">Conversation Thread</h3>
                     <span class="text-xs text-text-tertiary">{{ $messages->count() }} messages</span>
                 </div>
-                <div class="divide-y divide-border-subtle">
+                <div class="divide-y divide-border-subtle" wire:poll.5s>
                     @foreach($messages as $msg)
                         @php
                             $isAdmin = $msg->sender_type === \App\Models\PlatformUser::class;
