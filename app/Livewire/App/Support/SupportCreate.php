@@ -26,6 +26,16 @@ class SupportCreate extends Component
         'attachments.*' => 'nullable|file|max:10240', // 10MB Max per file
     ];
 
+    public function mount()
+    {
+        if (request()->query('subject')) {
+            $this->subject = request()->query('subject');
+        }
+        if (request()->query('priority')) {
+            $this->priority = request()->query('priority');
+        }
+    }
+
     public function submit(TicketService $ticketService)
     {
         $this->validate();

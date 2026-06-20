@@ -14,10 +14,12 @@ class Billing extends Component
     public function render()
     {
         $organization = Auth::user()->organization;
-        $plan = $organization->plan;
+        $subscription = $organization->subscription()->with('plan')->first();
+        $plan = $subscription?->plan;
 
         return view('livewire.app.settings.billing', [
             'organization' => $organization,
+            'subscription' => $subscription,
             'plan' => $plan,
         ]);
     }

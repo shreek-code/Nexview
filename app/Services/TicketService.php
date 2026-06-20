@@ -6,6 +6,11 @@ use App\Models\Ticket;
 use App\Models\TicketMessage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
+use App\Models\PlatformUser;
+use App\Notifications\TicketCreated;
+use App\Notifications\TicketReply;
+use App\Notifications\TicketStatusUpdated;
 use Illuminate\Support\Str;
 
 class TicketService
@@ -24,6 +29,10 @@ class TicketService
         ]);
 
         $this->addMessage($ticket, $user, $data['message'], $data['attachments'] ?? []);
+
+        // Notify admins
+        $admins = PlatformUser::all();
+        Notification::send($admins, new TicketCreated($ticket));
 
         return $ticket;
     }
@@ -45,14 +54,20 @@ class TicketService
 
         // If a PlatformUser (Admin) replies, set status to in_progress if it was open.
         // If a normal User replies, we might want to change status to open if it was resolved/closed.
-        if (get_class($sender) === \App\Models\PlatformUser::class) {
+        $isAdmin = get_class($sender) === \App\Models\PlatformUser::class;
+        if ($isAdmin) {
             if ($ticket->status === 'open') {
                 $ticket->update(['status' => 'in_progress']);
             }
+            // Notify user
+            $ticket->user->notify(new TicketReply($ticket, $ticketMessage));
         } else {
              if (in_array($ticket->status, ['resolved', 'closed'])) {
                 $ticket->update(['status' => 'open']);
              }
+             // Notify admins
+             $admins = PlatformUser::all();
+             Notification::send($admins, new TicketReply($ticket, $ticketMessage));
         }
 
         return $ticketMessage;
@@ -78,7 +93,13 @@ class TicketService
      */
     public function updateStatus(Ticket $ticket, string $status): bool
     {
-        return $ticket->update(['status' => $status]);
+        $updated = $ticket->update(['status' => $status]);
+        
+        if ($updated) {
+            $ticket->user->notify(new TicketStatusUpdated($ticket));
+        }
+        
+        return $updated;
     }
 
     /**

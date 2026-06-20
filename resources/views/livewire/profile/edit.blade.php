@@ -254,18 +254,14 @@
                         <!-- Quick actions -->
                         <div class="space-y-3">
                             <h4 class="text-xs font-semibold uppercase tracking-wider text-text-tertiary mb-4">Quick Actions</h4>
-                            <button class="w-full flex items-center justify-between p-4 rounded-xl border border-border-subtle bg-surface-1 hover:bg-surface-2 transition-colors text-sm font-semibold text-text-primary">
+                            <a href="{{ route('web.pricing') }}" class="w-full flex items-center justify-between p-4 rounded-xl border border-border-subtle bg-surface-1 hover:bg-surface-2 transition-colors text-sm font-semibold text-text-primary">
                                 <span>Change Plan</span>
                                 <x-heroicon-o-chevron-right class="w-4 h-4 text-text-tertiary" />
-                            </button>
-                            <button class="w-full flex items-center justify-between p-4 rounded-xl border border-border-subtle bg-surface-1 hover:bg-surface-2 transition-colors text-sm font-semibold text-text-primary">
-                                <span>Payment Methods</span>
-                                <x-heroicon-o-chevron-right class="w-4 h-4 text-text-tertiary" />
-                            </button>
-                            <button class="w-full flex items-center justify-between p-4 rounded-xl border border-border-subtle bg-surface-1 hover:bg-surface-2 transition-colors text-sm font-semibold text-red-600 hover:text-red-700">
+                            </a>
+                            <a href="{{ route('app.support.create') }}?subject=Cancellation+Request&priority=high" class="w-full flex items-center justify-between p-4 rounded-xl border border-border-subtle bg-surface-1 hover:bg-surface-2 transition-colors text-sm font-semibold text-red-600 hover:text-red-700">
                                 <span>Cancel Subscription</span>
                                 <x-heroicon-o-chevron-right class="w-4 h-4 text-red-500" />
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>

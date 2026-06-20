@@ -18,6 +18,8 @@ class ScreenIndex extends Component
     public $name = '';
     public $location_id = '';
 
+    public $connectionError = null;
+
     public function mount()
     {
         if (request()->query('add')) {
@@ -27,13 +29,15 @@ class ScreenIndex extends Component
 
     public function openAddModal()
     {
-        $this->reset(['registration_code', 'name', 'location_id']);
+        $this->reset(['registration_code', 'name', 'location_id', 'connectionError']);
         $this->showAddModal = true;
         $this->dispatch('open-modal', 'add-screen-modal');
     }
 
     public function connectScreen()
     {
+        $this->connectionError = null;
+        
         $this->validate([
             'registration_code' => 'required|string|size:6',
             'name' => 'required|string|max:255',
@@ -55,13 +59,9 @@ class ScreenIndex extends Component
             $this->dispatch('close-modal', 'add-screen-modal');
             session()->flash('success', 'Screen paired successfully.');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            foreach ($e->errors() as $key => $messages) {
-                foreach ($messages as $message) {
-                    $this->addError($key, $message);
-                }
-            }
+            $this->connectionError = collect($e->errors())->flatten()->first();
         } catch (\Exception $e) {
-            $this->addError('registration_code', 'An error occurred: ' . $e->getMessage());
+            $this->connectionError = 'An error occurred: ' . $e->getMessage();
         }
     }
 

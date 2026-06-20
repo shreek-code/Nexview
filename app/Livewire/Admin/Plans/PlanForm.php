@@ -12,6 +12,8 @@ class PlanForm extends Component
 
     public $name;
     public $slug;
+    public $price_inr = 0;
+    public $price_period;
     public $payment_model;
     public $billing_cycle;
     public $remote_access = true;
@@ -30,6 +32,8 @@ class PlanForm extends Component
             $this->plan = $plan;
             $this->name = $plan->name;
             $this->slug = $plan->slug;
+            $this->price_inr = $plan->price_inr;
+            $this->price_period = $plan->price_period;
             $this->payment_model = $plan->payment_model;
             $this->billing_cycle = $plan->billing_cycle;
             $this->remote_access = $plan->remote_access;
@@ -83,6 +87,8 @@ class PlanForm extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:plans,slug,' . ($this->plan ? $this->plan->id : 'NULL'),
+            'price_inr' => 'required|integer|min:0',
+            'price_period' => 'nullable|string|in:per_screen_month,per_screen_year,flat_monthly,flat_yearly,one_time',
             'payment_model' => 'nullable|string',
             'billing_cycle' => 'nullable|string',
             'remote_access' => 'boolean',
@@ -97,6 +103,8 @@ class PlanForm extends Component
         $data = [
             'name' => $this->name,
             'slug' => $this->slug,
+            'price_inr' => $this->price_inr,
+            'price_period' => $this->price_period,
             'payment_model' => $this->payment_model,
             'billing_cycle' => $this->billing_cycle,
             'remote_access' => $this->remote_access,

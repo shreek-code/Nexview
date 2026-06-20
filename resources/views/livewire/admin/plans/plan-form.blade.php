@@ -26,6 +26,31 @@
                 </div>
             </div>
 
+            <!-- PRICING -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-bg-border pt-6">
+                <div>
+                    <label class="block text-sm font-medium text-text-secondary mb-1">Price (INR)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-text-tertiary font-medium">₹</span>
+                        <input type="number" wire:model="price_inr" min="0" class="w-full bg-bg-element border border-bg-border rounded-lg pl-8 pr-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g. 250">
+                    </div>
+                    @error('price_inr') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-text-secondary mb-1">Price Period</label>
+                    <select wire:model="price_period" class="w-full bg-bg-element border border-bg-border rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <option value="">Select...</option>
+                        <option value="per_screen_month">Per Screen / Month</option>
+                        <option value="per_screen_year">Per Screen / Year</option>
+                        <option value="flat_monthly">Flat Monthly</option>
+                        <option value="flat_yearly">Flat Yearly</option>
+                        <option value="one_time">One Time</option>
+                    </select>
+                    @error('price_period') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-bg-border pt-6">
                 <div>
                     <label class="block text-sm font-medium text-text-secondary mb-1">Payment Model</label>
