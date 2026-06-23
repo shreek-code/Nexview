@@ -62,6 +62,7 @@ class PlayerRegistrationController extends Controller
             'screen_name' => $screen->name,
             'location_id' => $screen->location_id,
             'token' => $token,
+            'reverb_app_key' => config('broadcasting.connections.reverb.key'),
         ]);
     }
 }

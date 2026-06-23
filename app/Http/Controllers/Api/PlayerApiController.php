@@ -142,6 +142,7 @@ class PlayerApiController extends Controller
             'is_playing' => $screen->is_playing,
             'current_media_id' => $screen->current_media_id,
             'campaigns' => $payload,
+            'reverb_app_key' => config('broadcasting.connections.reverb.key'),
         ]);
     }
 
@@ -171,6 +172,30 @@ class PlayerApiController extends Controller
             'size' => $mediaAsset->size,
             'type' => $mediaAsset->type,
         ]);
+    }
+
+    /**
+     * Stream a specific media asset in chunks (supports HTTP Range requests).
+     */
+    public function stream(Request $request, $id)
+    {
+        $screen = $request->user();
+
+        $mediaAsset = MediaAsset::where('id', $id)
+            ->where('organization_id', $screen->organization_id)
+            ->first();
+
+        if (! $mediaAsset) {
+            return response()->json(['error' => 'Media asset not found or unauthorized.'], 404);
+        }
+
+        $path = storage_path('app/public/'.$mediaAsset->path);
+        
+        if (!file_exists($path)) {
+            return response()->json(['error' => 'File not found on disk.'], 404);
+        }
+
+        return response()->file($path);
     }
 
     /**
