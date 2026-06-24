@@ -19,6 +19,26 @@ class ScreenShow extends Component
     public $is_playing;
     public $activeTab = 'control'; // control, media
 
+    public function getListeners(): array
+    {
+        $orgId = Auth::user()?->organization_id;
+        if (! $orgId) return [];
+
+        return [
+            "echo-private:organization.{$orgId},.screen.updated" => 'refreshScreenState',
+        ];
+    }
+
+    /**
+     * Refresh screen state from the database when a real-time event is received.
+     */
+    public function refreshScreenState(): void
+    {
+        $this->screen->refresh();
+        $this->volume = $this->screen->volume;
+        $this->is_playing = $this->screen->is_playing;
+    }
+
     public function mount(Screen $screen)
     {
         $this->authorize('view', $screen);

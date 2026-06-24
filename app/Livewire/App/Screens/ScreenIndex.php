@@ -7,12 +7,25 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use App\Models\Screen;
 use App\Models\MediaAsset;
+use App\Services\ScreenService;
 use Illuminate\Support\Facades\Auth;
 
 #[Layout('components.layouts.app')]
 #[Title('Screens')]
 class ScreenIndex extends Component
 {
+    public function getListeners(): array
+    {
+        $orgId = Auth::user()?->organization_id;
+        if (! $orgId) return [];
+
+        return [
+            "echo-private:organization.{$orgId},.screen.updated" => '$refresh',
+            "echo-private:organization.{$orgId},.screen.online" => '$refresh',
+            "echo-private:organization.{$orgId},.screen.offline" => '$refresh',
+        ];
+    }
+
     public $showAddModal = false;
     public $registration_code = '';
     public $name = '';
@@ -110,7 +123,7 @@ class ScreenIndex extends Component
         ]);
     }
 
-    public function setDefaultMedia($screenId, $mediaId)
+    public function setDefaultMedia($screenId, $mediaId, ScreenService $screenService)
     {
         $organizationId = Auth::user()->organization_id;
         $managerLocationIds = Auth::user()->role === 'manager' ? Auth::user()->locations()->pluck('locations.id')->toArray() : null;
@@ -125,7 +138,7 @@ class ScreenIndex extends Component
             abort(403);
         }
 
-        $screen->update(['default_media_id' => $mediaId]);
+        $screenService->updatePlaybackSettings($screen, ['default_media_id' => $mediaId]);
         session()->flash('success', 'Default media updated successfully.');
     }
 }

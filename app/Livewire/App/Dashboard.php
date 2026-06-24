@@ -15,6 +15,19 @@ use Illuminate\Support\Facades\Auth;
 #[Title('Dashboard')]
 class Dashboard extends Component
 {
+    public function getListeners(): array
+    {
+        $orgId = Auth::user()?->organization_id;
+        if (! $orgId) return [];
+
+        return [
+            "echo-private:organization.{$orgId},.screen.updated" => '$refresh',
+            "echo-private:organization.{$orgId},.screen.online" => '$refresh',
+            "echo-private:organization.{$orgId},.screen.offline" => '$refresh',
+            "echo-private:organization.{$orgId},.campaign.published" => '$refresh',
+        ];
+    }
+
     public function render()
     {
         $organizationId = Auth::user()->organization_id;
