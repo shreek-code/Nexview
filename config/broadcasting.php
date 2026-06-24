@@ -40,6 +40,7 @@ return [
                 'port' => env('REVERB_BROADCAST_PORT', env('REVERB_SERVER_PORT', 6002)),
                 'scheme' => env('REVERB_BROADCAST_SCHEME', 'http'),
                 'useTLS' => env('REVERB_BROADCAST_SCHEME', 'http') === 'https',
+                'path' => env('REVERB_SERVER_PATH', ''),
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
