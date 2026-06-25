@@ -78,10 +78,15 @@ class ScreenIndex extends Component
         }
     }
 
-    public function delete(Screen $screen)
+    public function delete($uuid)
     {
         $organizationId = Auth::user()->organization_id;
         $managerLocationIds = Auth::user()->role === 'manager' ? Auth::user()->locations()->pluck('locations.id')->toArray() : null;
+
+        $screen = Screen::where('uuid', $uuid)->first();
+        if (!$screen) {
+            abort(404);
+        }
 
         if ($screen->organization_id !== $organizationId) {
             abort(403);
