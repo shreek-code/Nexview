@@ -147,6 +147,102 @@ class PlayerApiController extends Controller
     }
 
     /**
+     * Fetch a flattened playlist of all currently scheduled media for the screen.
+     */
+    public function playlist(Request $request)
+    {
+        $screen = $request->user();
+
+        $now = now();
+        $currentDate = $now->toDateString();
+        $currentTime = $now->toTimeString();
+
+        $campaigns = Campaign::where('organization_id', $screen->organization_id)
+            ->where('status', 'active')
+            ->where(function ($q) use ($currentDate) {
+                $q->whereNull('date_start')->orWhere('date_start', '<=', $currentDate);
+            })
+            ->where(function ($q) use ($currentDate) {
+                $q->whereNull('date_end')->orWhere('date_end', '>=', $currentDate);
+            })
+            ->where(function ($q) use ($currentTime) {
+                $q->whereNull('time_start')->orWhere('time_start', '<=', $currentTime);
+            })
+            ->where(function ($q) use ($currentTime) {
+                $q->whereNull('time_end')->orWhere('time_end', '>=', $currentTime);
+            })
+            ->where(function ($q) use ($screen) {
+                $q->where('target_type', 'location')
+                    ->where('target_location_id', $screen->location_id)
+                    ->orWhere(function ($q2) use ($screen) {
+                        $q2->where('target_type', 'screens')
+                            ->whereHas('screens', function ($q3) use ($screen) {
+                                $q3->where('screens.id', $screen->id);
+                            });
+                    });
+            })
+            ->with(['mediaAsset', 'playlist.items.mediaAsset'])
+            ->orderBy('priority', 'desc')
+            ->get();
+
+        $playlist = [];
+
+        foreach ($campaigns as $campaign) {
+            if ($campaign->content_type === 'media' && $campaign->mediaAsset) {
+                $playlist[] = [
+                    'id' => $campaign->mediaAsset->id,
+                    'type' => $campaign->mediaAsset->type,
+                    'url' => asset('storage/'.$campaign->mediaAsset->path),
+                    'duration' => $campaign->mediaAsset->duration ?? 10,
+                    'campaign_id' => $campaign->id,
+                    'priority' => $campaign->priority,
+                    'hash' => file_exists(storage_path('app/public/'.$campaign->mediaAsset->path)) ? md5_file(storage_path('app/public/'.$campaign->mediaAsset->path)) : null,
+                ];
+            } elseif ($campaign->content_type === 'playlist' && $campaign->playlist) {
+                foreach ($campaign->playlist->items as $item) {
+                    if ($item->mediaAsset) {
+                        $playlist[] = [
+                            'id' => $item->mediaAsset->id,
+                            'type' => $item->mediaAsset->type,
+                            'url' => asset('storage/'.$item->mediaAsset->path),
+                            'duration' => $item->custom_duration ?? $item->mediaAsset->duration ?? 10,
+                            'order' => $item->sort_order,
+                            'campaign_id' => $campaign->id,
+                            'priority' => $campaign->priority,
+                            'hash' => file_exists(storage_path('app/public/'.$item->mediaAsset->path)) ? md5_file(storage_path('app/public/'.$item->mediaAsset->path)) : null,
+                        ];
+                    }
+                }
+            }
+        }
+
+        // Default media fallback
+        $defaultMedia = null;
+        if ($screen->defaultMedia) {
+            $defaultMedia = [
+                'id' => $screen->defaultMedia->id,
+                'type' => $screen->defaultMedia->type,
+                'url' => asset('storage/'.$screen->defaultMedia->path),
+                'duration' => $screen->defaultMedia->duration ?? 10,
+                'is_default' => true,
+                'hash' => file_exists(storage_path('app/public/'.$screen->defaultMedia->path)) ? md5_file(storage_path('app/public/'.$screen->defaultMedia->path)) : null,
+            ];
+            
+            // If no campaigns are active, the playlist just consists of the default media
+            if (empty($playlist)) {
+                $playlist[] = $defaultMedia;
+            }
+        }
+
+        return response()->json([
+            'screen_id' => $screen->id,
+            'timestamp' => now()->toIso8601String(),
+            'playlist' => $playlist,
+            'default_media' => $defaultMedia,
+        ]);
+    }
+
+    /**
      * Download or retrieve URL for a specific media asset.
      */
     public function media(Request $request, $id)
