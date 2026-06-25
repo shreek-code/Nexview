@@ -14,8 +14,7 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('player')->group(function () {
     Route::post('/register', [PlayerRegistrationController::class, 'register'])
-        ->middleware('throttle:5,1');
-        
+        ->middleware('throttle:100,1');
     // Protected Player API routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/heartbeat', [\App\Http\Controllers\Api\PlayerApiController::class, 'heartbeat']);
