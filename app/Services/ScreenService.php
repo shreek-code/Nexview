@@ -52,6 +52,7 @@ class ScreenService
             'name' => $data['name'],
             'location_id' => $data['location_id'],
             'device_id' => $deviceData['device_id'],
+            'registration_code' => $code,
             'status' => 'online',
             'player_version' => $deviceData['player_version'],
             'resolution' => $deviceData['resolution'],
