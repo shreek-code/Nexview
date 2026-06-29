@@ -11,7 +11,6 @@ class WebController extends Controller
     public function home()
     {
 
-        dd(\Illuminate\Support\Facades\Cache::get('device_registration:84GVKF'));
         return view('web.home');
     }
 
