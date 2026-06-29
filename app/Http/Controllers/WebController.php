@@ -10,6 +10,8 @@ class WebController extends Controller
 {
     public function home()
     {
+
+        dd(\Illuminate\Support\Facades\Cache::get('device_registration:84GVKF'));
         return view('web.home');
     }
 
@@ -27,7 +29,7 @@ class WebController extends Controller
     public function page($slug)
     {
         $page = Page::where('slug', $slug)->where('is_published', true)->first();
-        
+
         if (!$page) {
             // Fallback to static views if they exist
             if (view()->exists('web.' . $slug)) {
@@ -45,7 +47,7 @@ class WebController extends Controller
             ->with(['authors', 'categories', 'tags'])
             ->orderBy('published_at', 'desc')
             ->paginate(12);
-            
+
         return view('web.blogs', compact('posts'));
     }
 
