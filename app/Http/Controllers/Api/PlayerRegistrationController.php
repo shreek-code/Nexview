@@ -27,7 +27,7 @@ class PlayerRegistrationController extends Controller
             'orientation' => 'nullable|in:landscape,portrait',
         ]);
 
-       dd(Cache::getDefaultDriver());
+    //    dd(Cache::getDefaultDriver());
         $screen = $this->screenService->pairScreen(
             $validated['registration_code'],
             $validated['device_id'],
@@ -37,7 +37,7 @@ class PlayerRegistrationController extends Controller
         );
 
         if (!$screen) {
-            Cache::put(
+            dd(Cache::driver('redis')->put(
                 'device_registration:' . strtoupper($validated['registration_code']),
                 [
                     'device_id' => $validated['device_id'],
@@ -46,7 +46,7 @@ class PlayerRegistrationController extends Controller
                     'orientation' => $validated['orientation'] ?? null,
                 ],
                 now()->addMinutes(5)
-            );
+            ));
 
             return response()->json([
                 'status' => 'pending',
