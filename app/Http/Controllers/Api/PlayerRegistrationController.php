@@ -48,7 +48,7 @@ class PlayerRegistrationController extends Controller
                 now()->addMinutes(5)
             );
 
-            dd(Cache::driver('redis')->get('device_registration:' . strtoupper($validated['registration_code'])));
+            // dd(Cache::driver('redis')->get('device_registration:' . strtoupper($validated['registration_code'])));
             return response()->json([
                 'status'  => 'pending',
                 'message' => 'Waiting for user to enter code in the dashboard.',
