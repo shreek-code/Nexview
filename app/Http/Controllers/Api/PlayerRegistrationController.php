@@ -27,17 +27,25 @@ class PlayerRegistrationController extends Controller
             'orientation'       => 'nullable|in:landscape,portrait',
         ]);
 
-        //    dd(Cache::getDefaultDriver());
-        $screen = $this->screenService->pairScreen(
-            $validated['registration_code'],
-            $validated['device_id'],
-            $validated['player_version'] ?? '1.0.0',
-            $validated['resolution'] ?? null,
-            $validated['orientation'] ?? null
-        );
+        // Attempt to find an ALREADY PROVISIONED screen by device_id AND registration_code.
+        // It will only match if the dashboard has provisioned it and the code hasn't been cleared yet.
+        $screen = \App\Models\Screen::withoutGlobalScope('organization')
+            ->where('device_id', $validated['device_id'])
+            ->where('registration_code', strtoupper($validated['registration_code']))
+            ->first();
+
+        if ($screen) {
+            $screen = $this->screenService->pairScreen(
+                $validated['device_id'],
+                $screen->organization_id,
+                $validated['player_version'] ?? '1.0.0',
+                $validated['resolution'] ?? null,
+                $validated['orientation'] ?? null
+            );
+        }
 
         if (!$screen) {
-            Cache::driver('redis')->put(
+            Cache::put(
                 'device_registration:' . strtoupper($validated['registration_code']),
                 [
                     'device_id'      => $validated['device_id'],
@@ -48,14 +56,14 @@ class PlayerRegistrationController extends Controller
                 now()->addMinutes(5)
             );
 
-            // dd(Cache::driver('redis')->get('device_registration:' . strtoupper($validated['registration_code'])));
             return response()->json([
                 'status'  => 'pending',
                 'message' => 'Waiting for user to enter code in the dashboard.',
             ], 202); // 202 Accepted = keep polling
         }
 
-        // Issue a Sanctum token for the player
+        // Issue a Sanctum token for the player (Idempotent: revoke existing token first)
+        $screen->tokens()->where('name', 'player-auth-token')->delete();
         $token = $screen->createToken('player-auth-token')->plainTextToken;
 
         return response()->json([

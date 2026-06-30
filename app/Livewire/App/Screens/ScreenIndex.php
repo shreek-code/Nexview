@@ -50,14 +50,14 @@ class ScreenIndex extends Component
     public function connectScreen()
     {
         $this->connectionError = null;
-        
+
         $this->validate([
             'registration_code' => 'required|string|size:6',
             'name' => 'required|string|max:255',
             'location_id' => 'required|exists:locations,id',
         ]);
 
-        $screenService = app(\App\Services\ScreenService::class);
+        $screenService = app(ScreenService::class);
         $billingService = app(\App\Services\BillingService::class);
         try {
             $billingService->enforceScreenLimit(Auth::user()->organization);

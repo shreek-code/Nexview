@@ -33,7 +33,7 @@ class EndToEndFlowTest extends TestCase
             'organization_name' => 'Acme Corp',
         ]);
         
-        $response->assertRedirect('/app/dashboard');
+        $response->assertRedirect('/app/onboarding');
         $this->assertAuthenticated();
 
         /** @var User $user */
@@ -45,6 +45,22 @@ class EndToEndFlowTest extends TestCase
         $this->assertEquals('Acme Corp', $organization->name);
         $this->assertFalse((bool)$organization->is_onboarded);
 
+        // 1b. Simulate Billing Onboarding (Livewire Onboarding Flow)
+        $plan = \App\Models\Plan::create([
+            'name' => 'Basic',
+            'slug' => 'basic',
+            'stripe_price_id' => 'price_123',
+            'max_screens' => 10,
+            'max_storage_bytes' => 10240,
+            'is_active' => true,
+        ]);
+        $organization->subscription()->create([
+            'plan_id' => $plan->id,
+            'stripe_subscription_id' => 'sub_123',
+            'status' => 'active',
+        ]);
+        $organization->update(['is_onboarded' => true]);
+
         // 2. Setup Wizard - Create Location
         $location = Location::create([
             'organization_id' => $organization->id,
@@ -53,14 +69,22 @@ class EndToEndFlowTest extends TestCase
         ]);
         $this->assertEquals('Headquarters', $location->name);
 
-        // 3. Setup Wizard - Create Screen
-        $screen = Screen::create([
-            'location_id' => $location->id,
-            'organization_id' => $organization->id,
+        // 3. Player announces intent
+        $pairingCode = '123456';
+        $response = $this->postJson('/api/player/register', [
+            'registration_code' => $pairingCode,
+            'device_id' => 'ANDROID_TV_123',
+            'player_version' => '1.0.0',
+            'resolution' => '1920x1080',
+            'orientation' => 'landscape',
+        ]);
+        $response->assertStatus(202);
+
+        // 3b. Dashboard provisions screen
+        $screen = app(\App\Services\ScreenService::class)->provisionScreen($user, [
             'name' => 'Lobby TV',
-            'status' => 'unregistered',
-            'registration_code' => '123456',
-            'registration_code_expires_at' => now()->addMinutes(10),
+            'location_id' => $location->id,
+            'registration_code' => $pairingCode,
         ]);
         $this->assertEquals('Lobby TV', $screen->name);
 
@@ -110,14 +134,7 @@ class EndToEndFlowTest extends TestCase
         $organization->refresh();
         $this->assertTrue((bool)$organization->is_onboarded);
 
-        // 8. Player API - Register Screen
-        $pairingCode = '123456';
-        $screen->update([
-            'registration_code' => $pairingCode,
-            'registration_code_expires_at' => now()->addMinutes(10),
-            'status' => 'unregistered',
-        ]);
-
+        // 8. Player API - Poll again
         auth()->logout();
 
         $response = $this->postJson('/api/player/register', [

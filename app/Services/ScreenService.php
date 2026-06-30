@@ -26,10 +26,17 @@ class ScreenService
 
     /**
      * User enters the code from the device into the web dashboard to register it.
+     * Enforces billing limits internally — callers do not need to check separately.
      */
     public function provisionScreen(\App\Models\User $user, array $data): Screen
     {
-        $organizationId = $user->organization_id;
+        $organization = $user->organization;
+        $organizationId = $organization->id;
+
+        // Enforce billing limit within the service — single source of truth
+        $billingService = app(\App\Services\BillingService::class);
+        $billingService->enforceScreenLimit($organization);
+
         $managerLocationIds = $user->role === 'manager' ? $user->locations()->pluck('locations.id')->toArray() : null;
 
         $location = \App\Models\Location::where('organization_id', $organizationId)
@@ -66,43 +73,43 @@ class ScreenService
     }
 
     /**
-     * Pair a physical screen using its registration code when it polls the server.
+     * Find an already-provisioned screen by device ID and update its heartbeat.
+     *
+     * Called when the Android player polls after the dashboard has provisioned
+     * the screen via provisionScreen(). The organization_id is required to
+     * prevent cross-tenant device hijacking.
+     *
+     * @param string $deviceId     The permanent hardware device identifier.
+     * @param int    $organizationId  The org that owns the screen (resolved from cache by the controller).
+     * @param string $version      Player app version string.
+     * @param string|null $resolution  Screen resolution e.g. '1920x1080'.
+     * @param string|null $orientation 'landscape' or 'portrait'.
+     * @return Screen|null  The matched screen, or null if no provisioned screen exists for this device+org.
      */
-    public function pairScreen(string $code, string $deviceId, string $version, ?string $resolution, ?string $orientation): ?Screen
+    public function pairScreen(string $deviceId, int $organizationId, string $version, ?string $resolution, ?string $orientation): ?Screen
     {
-        // First check if the device was already paired by the dashboard (device_id exists)
-        $screen = Screen::where('device_id', $deviceId)->first();
-
-        if ($screen) {
-            $screen->update([
-                'status' => 'online',
-                'player_version' => $version,
-                'resolution' => $resolution,
-                'orientation' => $orientation,
-                'last_heartbeat_at' => now(),
-            ]);
-            return $screen;
-        }
-
-        // Fallback: check if the dashboard pre-generated a code
-        $screenByCode = Screen::where('registration_code', strtoupper($code))
-            ->where('registration_code_expires_at', '>', now())
+        // Explicitly bypass the global organization scope and apply manual org filter.
+        // The global scope is inactive in API context (auth user is a Screen, not User),
+        // so we must enforce tenant isolation manually here.
+        $screen = Screen::withoutGlobalScope('organization')
+            ->where('device_id', $deviceId)
+            ->where('organization_id', $organizationId)
             ->first();
 
-        if ($screenByCode) {
-            $screenByCode->update([
-                'registration_code' => null, // Clear the code after pairing
-                'device_id' => $deviceId,    // Store the actual permanent device_id
-                'status' => 'online',
-                'player_version' => $version,
-                'resolution' => $resolution,
-                'orientation' => $orientation,
-                'last_heartbeat_at' => now(),
-            ]);
-            return $screenByCode;
+        if (!$screen) {
+            return null;
         }
 
-        return null;
+        $screen->update([
+            'registration_code' => null, // Prevents re-pairing or hijacking once successfully paired
+            'status' => 'online',
+            'player_version' => $version,
+            'resolution' => $resolution,
+            'orientation' => $orientation,
+            'last_heartbeat_at' => now(),
+        ]);
+
+        return $screen;
     }
 
     /**
