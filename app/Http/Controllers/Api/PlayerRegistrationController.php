@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\ScreenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class PlayerRegistrationController extends Controller
 {
@@ -26,6 +27,7 @@ class PlayerRegistrationController extends Controller
             'orientation' => 'nullable|in:landscape,portrait',
         ]);
 
+       dd(Cache::getDefaultDriver());
         $screen = $this->screenService->pairScreen(
             $validated['registration_code'],
             $validated['device_id'],
@@ -35,7 +37,7 @@ class PlayerRegistrationController extends Controller
         );
 
         if (!$screen) {
-            \Illuminate\Support\Facades\Cache::put(
+            Cache::put(
                 'device_registration:' . strtoupper($validated['registration_code']),
                 [
                     'device_id' => $validated['device_id'],
